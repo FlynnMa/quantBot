@@ -33,7 +33,7 @@ for x in range(len(df)):
         cash = cash - hands * one_hand
         share = hands * 100
     # sell, sell, sell, ma_short < ma_long
-    elif (share > 100) and (ma_short < ma_long):
+    elif (share >= 100) and (ma_short < ma_long):
         # sell signal comes
         sell_list.append(cur_price)
         buy_list.append(float('nan'))

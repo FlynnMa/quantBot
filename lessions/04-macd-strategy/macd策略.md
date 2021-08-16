@@ -2,24 +2,39 @@
 MACD - moving average convergence divergence
 是趋势和震荡的交易指标，
 
-
 用2个EMA价格相减， 
-EMA12 -  EMA26
+MACD = EMA12(价格) -  EMA26（价格）
+
+信号 = EMA9(MACD)
+
+
+
 EMA - exponential 
 moving average， 
 计算方法可以理解成， MA是EMA的一种特殊形式
 MA的计算：
-
-$$S_n = \dfrac{x_0 + x_1 + ... x_n} {n}$$
+$$
+S_n = \dfrac{x_0 + x_1 + ... x_n} {n}
+$$
 
 
 对它改变形式写成：
-$$S_{n} = (1-\dfrac{1}{n})S_{n-1} + \dfrac{1}{n}x_{n}$$
+$$
+S_{n} = (1-\dfrac{1}{n})S_{n-1} + \dfrac{1}{n}x_{n}
+$$
 
-设：$$\alpha = \dfrac{1}{n}$$ , 
+
+设：
+$$
+\alpha = \dfrac{1}{n}
+$$
 
 
-进一步把$$S_n$$的计算写成： $$S_n = S_{n-1} + \alpha(x_n - S_{n-1})$$
+进一步把$$S_n$$的计算写成： 
+$$
+S_n = S_{n-1} + \alpha(x_n - S_{n-1})
+$$
+
 
 
 这个公式就是EMA了
@@ -39,3 +54,20 @@ https://en.wikipedia.org/wiki/Exponential_smoothing
 • 买入 = 信号向上交叉 
 • 卖出 = 信号向下交叉
 • 有时交叉时的信号速度也被作为参考指标
+
+
+
+
+
+# 参考文档
+
+https://en.wikipedia.org/wiki/MACD
+
+
+
+https://towardsdatascience.com/implementing-macd-in-python-cc9b2280126a#:~:text=Implementing%20MACD%20in%20Python%20MACD%20is%20a%20popularly,technical%20indicator%20in%20trading%20stocks%2C%20currencies%2C%20cryptocurrencies%2C%20etc.
+
+
+
+https://medium.com/codex/algorithmic-trading-with-macd-in-python-1c2769a6ad1b
+

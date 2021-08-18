@@ -50,6 +50,9 @@ https://en.wikipedia.org/wiki/Exponential_smoothing
 股票牛熊的判定：
 • MACD在0以上的时候，认为是股票转牛
 • MACD在1以下的时候，认为是股票转熊
+
+
+
 判定交易的买入点和卖出点:
 • 买入 = 信号向上交叉 
 • 卖出 = 信号向下交叉

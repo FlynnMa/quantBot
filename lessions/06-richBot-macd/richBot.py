@@ -5,13 +5,18 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
 import numpy as np
+import matplotlib as mpl
+
+mpl.rcParams['grid.color'] = 'gray'
+mpl.rcParams['grid.linestyle'] = '--'
+mpl.rcParams['grid.linewidth'] = 0.1
 
 # stock symbol
-#stock_symbol = '002032'
-stock_symbol = '601398'
+stock_symbol = '002415'
+# stock_symbol = '601398'
 
 # get data
-df = pdr.get_data_tiingo(stock_symbol, start='2020-01-01', end='2021-08-11',
+df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18',
                          api_key=os.getenv('TIINGO_API_KEY'))
 df.reset_index(level=0, inplace=True)
 df.index = df.index.date
@@ -31,7 +36,7 @@ df['macd_signal'] = df['macd'].ewm(span=ema_signal_win).mean()
 df['macd_diff'] = df['macd'] - df['macd_signal']
 # %%
 
-cash = 10000
+cash = 1000000
 share = 0
 buy_list = []
 sell_list = []
@@ -61,11 +66,11 @@ for x in range(len(df)):
         else:
             action = 'none'
     elif state == 'crossup':
-        if diff <= 0:
+        if diff < 0:
             action = 'sell'
             state = 'crossdown'
     elif state == 'crossdown':
-        if diff >= 0:
+        if diff > 0:
             action = 'buy'
             state = 'crossup'
 
@@ -89,7 +94,6 @@ for x in range(len(df)):
 print("simulation completed:")
 print(cash)
 print(share)
-print("last price{}".format(cur_price))
 capital = cur_price * share + cash
 print("capital: " + str(capital))
 
@@ -99,14 +103,13 @@ buy_actions = df['buy'].dropna()
 sell_actions = df['sell'].dropna()
 
 plt.style.use('dark_background')
-fig = plt.figure(figsize=(24, 20))
+fig = plt.figure(figsize=(12, 8))
 fig.suptitle('macd strategy', fontsize=60)
-
 axs = fig.subplots(2)
 
 df['adjClose'].plot(ax=axs[0], color='purple',
                     label='price', rot=90, grid=True)
-df['ema_short'].plot(ax=axs[0], color='yellow',
+df['ema_long'].plot(ax=axs[0], color='yellow',
                      label='price', rot=90, grid=True)
 
 axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -134,8 +137,21 @@ plt.legend(loc="upper right")
 plt.show()
 
 # %%
+fig = plt.figure(figsize=(12, 8))
+fig.suptitle('macd buy and sell actions', fontsize=60)
+axs = fig.subplots(2)
+
 td = buy_actions.reset_index().drop('index',  axis='columns')
 td['sell'] = sell_actions.reset_index().drop('index', axis='columns')
+if (len(td) == 0):
+    exit()
 color_dict = {'buy': 'red', 'sell': 'green'}
-td.plot(kind='bar', color=color_dict, title='trade actions', figsize=(12, 8))
+td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
+td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
+
+# profit
+td1 = td['buy'] - td['sell']
+colors = np.where(td1.values > 0, 'r', 'g')
+td1.plot(ax=axs[1], kind='bar', color=colors, title='profit')
+plt.show()
 # %%

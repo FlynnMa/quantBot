@@ -49,7 +49,7 @@ https://en.wikipedia.org/wiki/Exponential_smoothing
 # 交易策略
 股票牛熊的判定：
 • MACD在0以上的时候，认为是股票转牛
-• MACD在1以下的时候，认为是股票转熊
+• MACD在0以下的时候，认为是股票转熊
 
 
 

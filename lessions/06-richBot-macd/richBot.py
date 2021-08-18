@@ -12,8 +12,11 @@ mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linewidth'] = 0.1
 
 # stock symbol
-stock_symbol = '002415'
+stock_symbol = '002594'
 # stock_symbol = '601398'
+
+cash = 1000000
+
 
 # get data
 df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18',
@@ -35,8 +38,6 @@ df['macd'] = df['ema_short'] - df['ema_long']
 df['macd_signal'] = df['macd'].ewm(span=ema_signal_win).mean()
 df['macd_diff'] = df['macd'] - df['macd_signal']
 # %%
-
-cash = 1000000
 share = 0
 buy_list = []
 sell_list = []
@@ -150,7 +151,7 @@ td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
 td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
 
 # profit
-td1 = td['buy'] - td['sell']
+td1 = td['sell'] - td['buy']
 colors = np.where(td1.values > 0, 'r', 'g')
 td1.plot(ax=axs[1], kind='bar', color=colors, title='profit')
 plt.show()

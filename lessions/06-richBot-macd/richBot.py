@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 import os
 import numpy as np
 import matplotlib as mpl
+import pandas as pd
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -19,8 +20,7 @@ cash = 1000000
 
 
 # get data
-df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18',
-                         api_key=os.getenv('TIINGO_API_KEY'))
+df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18')
 df.reset_index(level=0, inplace=True)
 df.index = df.index.date
 # %%
@@ -42,8 +42,6 @@ share = 0
 buy_list = []
 sell_list = []
 hold_price = 0
-stop_profit = 0.2
-stop_loss = 0.5
 diff_list_buy = []
 diff_list_sell = []
 macd = 100
@@ -100,6 +98,7 @@ print("capital: " + str(capital))
 
 df['buy'] = buy_list
 df['sell'] = sell_list
+
 buy_actions = df['buy'].dropna()
 sell_actions = df['sell'].dropna()
 
@@ -111,7 +110,7 @@ axs = fig.subplots(2)
 df['adjClose'].plot(ax=axs[0], color='purple',
                     label='price', rot=90, grid=True)
 df['ema_long'].plot(ax=axs[0], color='yellow',
-                     label='price', rot=90, grid=True)
+                    label='price', rot=90, grid=True)
 
 axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 axs[0].xaxis.set_major_locator(mdates.DayLocator(interval=5))
@@ -134,7 +133,6 @@ axs[1].vlines(x=buy_actions.index, ymin=-1,
 axs[1].vlines(x=sell_actions.index, ymin=-1,
               ymax=1, color='green', linestyle='--')
 plt.legend(loc="upper right")
-
 plt.show()
 
 # %%
@@ -142,17 +140,23 @@ fig = plt.figure(figsize=(12, 8))
 fig.suptitle('macd buy and sell actions', fontsize=60)
 axs = fig.subplots(2)
 
-td = buy_actions.reset_index().drop('index',  axis='columns')
-td['sell'] = sell_actions.reset_index().drop('index', axis='columns')
-if (len(td) == 0):
+buy_df = buy_actions.reset_index()
+buy_df.rename(columns={'index': 'buyDate'}, inplace=True)
+sell_df = sell_actions.reset_index()
+sell_df.rename(columns={'index': 'sellDate'}, inplace=True)
+deal_df = pd.concat([buy_df, sell_df], axis=1)
+
+if (len(deal_df) == 0):
+    print("no deal!")
     exit()
 color_dict = {'buy': 'red', 'sell': 'green'}
-td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
-td.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
+df2 = deal_df.loc[:, ['buy', 'sell']]
+df2.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
 
 # profit
-td1 = td['sell'] - td['buy']
-colors = np.where(td1.values > 0, 'r', 'g')
-td1.plot(ax=axs[1], kind='bar', color=colors, title='profit')
+deal_df['profits'] = deal_df['sell'] - deal_df['buy']
+colors = np.where(deal_df['profits'].values > 0, 'r', 'g')
+deal_df['profits'].plot(
+    ax=axs[1], kind='bar', color=colors, title='profit')
 plt.show()
 # %%

@@ -12,11 +12,14 @@ jupyter
 
 # 数据
 
-来源于 tiingo.com
-注册免费账号，登录以后，在自己的个人账号下面获取API_KEY
+目前的数据采用的是 tiingo.com免费提供的
+
+获取数据需要注册免费账号，登录以后，在自己的个人账号下面获取API_KEY
+
 
 然后把你的密钥加到环境变量里面，也可以直接写在代码里
-添加环境变量可以把下面的命令加到`.bashrc`
+
+添加密钥到环境变量可以把下面的命令加到`.bashrc`
 ```
 export TIINGO_API_KEY='你的API KEY'
 ```
@@ -44,4 +47,25 @@ fig.savefig("volume.png")
 
 
 # 交易策略
-待完善
+06-macd-strategy - 基于MACD的交易策略
+
+# 开发者
+
+### 单元测试
+
+```
+python3 setup.py pytest
+pytest -s
+```
+
+### 编译
+
+```
+python3 setup.py bdist_wheel
+```
+
+### 安装
+```
+pip uninstall dist/matBot-0.1.0-py3-none-any.whl 
+pip install dist/matBot-0.1.0-py3-none-any.whl
+```

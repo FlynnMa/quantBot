@@ -13,16 +13,16 @@ mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linewidth'] = 0.1
 
 # stock symbol
-stock_symbol = '002594'
-# stock_symbol = '601398'
-
-cash = 1000000
+stock_symbol = '000333'
+init_cash = 1000000
+init_share = 0
 
 
 # get data
 df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18')
 df.reset_index(level=0, inplace=True)
 df.index = df.index.date
+df.drop('symbol', axis=1, inplace=True)
 # %%
 
 # 26 days by default for long term ema
@@ -38,7 +38,7 @@ df['macd'] = df['ema_short'] - df['ema_long']
 df['macd_signal'] = df['macd'].ewm(span=ema_signal_win).mean()
 df['macd_diff'] = df['macd'] - df['macd_signal']
 # %%
-share = 0
+share = init_share
 buy_list = []
 sell_list = []
 hold_price = 0
@@ -46,6 +46,7 @@ diff_list_buy = []
 diff_list_sell = []
 macd = 100
 macd_old = 100
+cash = init_cash
 
 state = 'none'
 # trading bot starts
@@ -91,13 +92,16 @@ for x in range(len(df)):
         buy_list.append(float('nan'))
 
 print("simulation completed:")
-print(cash)
-print(share)
+print("cash  : " + str(cash))
+print("share : " + str(share))
 capital = cur_price * share + cash
 print("capital: " + str(capital))
+returnRate = (capital - 1000000) / 1000000
+print("return rate: " + str(returnRate))
 
 df['buy'] = buy_list
 df['sell'] = sell_list
+# %%
 
 buy_actions = df['buy'].dropna()
 sell_actions = df['sell'].dropna()
@@ -132,7 +136,7 @@ axs[1].vlines(x=buy_actions.index, ymin=-1,
               ymax=1, color='red', linestyle='--')
 axs[1].vlines(x=sell_actions.index, ymin=-1,
               ymax=1, color='green', linestyle='--')
-plt.legend(loc="upper right")
+plt.legend(loc="best")
 plt.show()
 
 # %%
@@ -155,6 +159,7 @@ df2.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
 
 # profit
 deal_df['profits'] = deal_df['sell'] - deal_df['buy']
+deal_df['rate'] = deal_df['profits'] / deal_df['buy']
 colors = np.where(deal_df['profits'].values > 0, 'r', 'g')
 deal_df['profits'].plot(
     ax=axs[1], kind='bar', color=colors, title='profit')

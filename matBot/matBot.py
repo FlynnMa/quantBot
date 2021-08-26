@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
-mpl.rcParams['grid.linewidth'] = 0.1
+mpl.rcParams['grid.linewidth'] = 0.2
 
 
 class matBot():
@@ -19,9 +19,6 @@ class matBot():
         self.stock_symbol = symbol
         self.cash = init_cash
         self.share = init_share
-        self.buy_list = []
-        self.sell_list = []
-        self.capital_list = []
 
         self.start = start
         self.end = datetime.date.today()
@@ -78,20 +75,21 @@ class matBot():
         -------
         None
         """
-        execute_price = self.df['adjClose'].iloc[x]
+        day = self.df.index.values[0]
+        execute_price = self.df.loc[day, 'adjClose']
         one_hand_price = execute_price * 100
         # buy
         if (action == 'buy') and (self.cash >= one_hand_price):
             num_hands = int(self.cash / one_hand_price)
             self.cash = self.cash - num_hands * one_hand_price
             self.share = num_hands * 100
-            self.df['buy'].iloc[x] = execute_price
+            self.df.loc[day, 'buy'] = execute_price
         # sell
         elif (action == 'sell') and (self.share >= 100):
             self.cash = self.share * execute_price + self.cash
             self.share = 0
-            self.df['sell'].iloc[x] = execute_price
-        self.df['capital'].iloc[x] = execute_price * self.share + self.cash
+            self.df.loc[day, 'sell'] = execute_price
+        self.df.loc[day, 'capital'] = execute_price * self.share + self.cash
 
     def run(self, strategic_callback):
         """
@@ -128,11 +126,23 @@ class matBot():
         profits_df['return_rate'] = profits_df['profits'] / profits_df['buy']
         self.profits_df = profits_df
 
-    def view_full(self):
+    def plot_price_with_orders(self, indicator='macd'):
+        """
+        绘制一段时间的价格和指标走势，标注买卖点
+
+        Parameters
+        ----------
+        indicator_callback - 回调函数
+
+        Returns
+        -------
+        None
+        """
         plt.style.use('dark_background')
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle('macd strategy', fontsize=60)
         axs = fig.subplots(2)
+        fig.tight_layout()
 
         self.df['adjClose'].plot(ax=axs[0], color='purple',
                                  label='price', rot=90, grid=True)
@@ -150,21 +160,69 @@ class matBot():
         axs[0].scatter(self.df.index, y=self.df['sell'].values, label='sell',
                        marker='x', s=70, color='#00ff00')
 
-        self.df['macd'].plot(ax=axs[1], color='green', label='macd', grid=True)
-        self.df['macd_signal'].plot(ax=axs[1], color='yellow', label='signal')
-        axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-        axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=5))
-        axs[1].axhline(y=0, linestyle='--', color='gray')
-        axs[1].vlines(x=self.buy_actions.index, ymin=-1,
-                      ymax=1, color='red', linestyle='--')
-        axs[1].vlines(x=self.sell_actions.index, ymin=-1,
-                      ymax=1, color='green', linestyle='--')
+        if indicator == 'macd':
+            self.df['macd'].plot(ax=axs[1], color='green',
+                                 label='macd', grid=True, rot=60)
+            self.df['macd_signal'].plot(
+                ax=axs[1], color='yellow', label='signal')
+            axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            axs[1].axhline(y=0, linestyle='--', color='gray')
+            axs[1].vlines(x=self.buy_actions.index, ymin=-1,
+                          ymax=1, color='red', linestyle='--')
+            axs[1].vlines(x=self.sell_actions.index, ymin=-1,
+                          ymax=1, color='green', linestyle='--')
         plt.legend(loc="best")
         plt.show()
 
+    def plot_deals(self):
+        fig = plt.figure(figsize=(12, 8))
+        fig.suptitle('orders analysis', fontsize=60)
+        axs = fig.subplots(3)
+        fig.tight_layout()
 
-def matBotRunner(symbol='601398', init_cash=1000000, init_share=0, start='2021-01-01', end=None):
+        buy_df = self.buy_actions.reset_index()
+        buy_df.rename(columns={'index': 'buyDate'}, inplace=True)
+        sell_df = self.sell_actions.reset_index()
+        sell_df.rename(columns={'index': 'sellDate'}, inplace=True)
+        deal_df = pd.concat([buy_df, sell_df], axis=1)
+
+        if (len(deal_df) == 0):
+            print("no orders!")
+            exit()
+        color_dict = {'buy': 'red', 'sell': 'green'}
+        df2 = deal_df.loc[:, ['buy', 'sell']]
+        df2.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
+
+        # profit
+        deal_df['profits'] = deal_df['sell'] - deal_df['buy']
+        deal_df['rate'] = deal_df['profits'] / deal_df['buy']
+        colors = np.where(deal_df['profits'].values > 0, 'r', 'g')
+        deal_df['profits'].plot(
+            ax=axs[1], kind='bar', color=colors, title='profit')
+        deal_df['rate'].plot(ax=axs[2], title='return rate')
+        plt.show()
+
+
+def matBotRunner(
+        symbol='601398', init_cash=1000000, init_share=0,
+        start='2021-01-01', end=None):
+    """
+    创建matBot， 获取交易数据
+
+    Parameters
+    ----------
+    symbol      - 股票的交易代码
+    init_cash   - 初始资金， 建议大于100股的市值
+    init_share  - 初始持股，建议是100的整数倍
+    start       - 获取交易数据的开始时间，例如'2010-01-01'
+    end         - 获取交易数据的结束时间，默认不填为今天
+
+    Returns
+    -------
+    创建的mbot对象
+    """
     bot = matBot(symbol, init_cash, init_share, start, end)
     bot.fetch()
-    print("fetch done")
+    print("fetch completed")
     return bot

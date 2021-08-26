@@ -2,10 +2,10 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
+with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-with open('LICENSE') as f:
+with open('LICENSE', encoding='utf-8') as f:
     license = f.read()
 
 setup(

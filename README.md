@@ -1,3 +1,8 @@
+# 腾讯云也已经上线
+这个库也可以从以下的链接进行访问：
+https://flynnbot.coding.net/public/quantBot/quantBot/git
+
+
 # 环境配置
 
 ```
@@ -61,11 +66,19 @@ pytest -s
 ### 编译
 
 ```
+python3 setup.py clean --all
 python3 setup.py bdist_wheel
 ```
 
 ### 安装
+安装python3
 ```
-pip uninstall dist/matBot-0.1.0-py3-none-any.whl 
-pip install dist/matBot-0.1.0-py3-none-any.whl
+https://www.python.org/downloads/
+```
+
+```
+# 如果安装过matBot
+python3 -m pip uninstall -y matBot
+# 安装库
+python3 -m pip install dist/matBot-0.1.0-py3-none-any.whl
 ```

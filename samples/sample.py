@@ -49,6 +49,8 @@ def macd_indicator(df):
 bot = mbot.matBotRunner(start='2020-01-01')
 bot.add_indicator(macd_indicator)
 bot.run(on_day_trade)
-bot.view_full()
+bot.plot_price_with_orders()
+
+bot.plot_deals()
 
 # %%

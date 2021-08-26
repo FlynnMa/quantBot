@@ -10,7 +10,17 @@ import matplotlib.pyplot as plt
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linewidth'] = 0.2
+SMALL_SIZE = 8
+MEDIUM_SIZE = 10
+BIGGER_SIZE = 12
 
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 class matBot():
     def __init__(self, symbol='601398', init_cash=1000000,
@@ -75,7 +85,7 @@ class matBot():
         -------
         None
         """
-        day = self.df.index.values[0]
+        day = self.df.index.values[x]
         execute_price = self.df.loc[day, 'adjClose']
         one_hand_price = execute_price * 100
         # buy
@@ -140,44 +150,54 @@ class matBot():
         """
         plt.style.use('dark_background')
         fig = plt.figure(figsize=(12, 8))
-        fig.suptitle('macd strategy', fontsize=60)
-        axs = fig.subplots(2)
+        fig.suptitle('macd strategy', fontsize=10)
+        axs = fig.subplots(3)
         fig.tight_layout()
 
         self.df['adjClose'].plot(ax=axs[0], color='purple',
-                                 label='price', rot=90, grid=True)
-        self.df['ema_long'].plot(ax=axs[0], color='yellow',
-                                 label='price', rot=90, grid=True)
+                                 label='price', rot=60, grid=True)
+        ypadding = self.df['adjClose'].mean() * 0.2
+        ymin = self.df['adjClose'].min() - ypadding * 0.2
+        ymax = self.df['adjClose'].max() + ypadding * 0.2
+        self.df['ema_long'].plot(ax=axs[0], color='yellow', ylim=(ymin,ymax),
+                                 label='price', rot=60, grid=True)
 
         axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-        axs[0].xaxis.set_major_locator(mdates.DayLocator(interval=5))
-        axs[0].vlines(x=self.buy_actions.index, ymin=0,
+        axs[0].xaxis.set_major_locator(mdates.DayLocator(interval=10))
+        axs[0].vlines(x=self.buy_actions.index, ymin=ymin,
                       ymax=self.buy_actions.values, color='red', linestyle='--')
-        axs[0].vlines(x=self.sell_actions.index, ymin=0,
+        axs[0].vlines(x=self.sell_actions.index, ymin=ymin,
                       ymax=self.sell_actions.values, color='green', linestyle='--')
         axs[0].scatter(self.df.index, y=self.df['buy'].values, label='buy',
                        marker='^', s=70, color='red')
         axs[0].scatter(self.df.index, y=self.df['sell'].values, label='sell',
                        marker='x', s=70, color='#00ff00')
 
+        self.df['capital'].plot(ax=axs[1], rot=60)
+        axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+        axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=10))
+
         if indicator == 'macd':
-            self.df['macd'].plot(ax=axs[1], color='green',
+            self.df['macd'].plot(ax=axs[2], color='green',
                                  label='macd', grid=True, rot=60)
             self.df['macd_signal'].plot(
-                ax=axs[1], color='yellow', label='signal')
-            axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-            axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=5))
-            axs[1].axhline(y=0, linestyle='--', color='gray')
-            axs[1].vlines(x=self.buy_actions.index, ymin=-1,
-                          ymax=1, color='red', linestyle='--')
-            axs[1].vlines(x=self.sell_actions.index, ymin=-1,
-                          ymax=1, color='green', linestyle='--')
-        plt.legend(loc="best")
+                ax=axs[2], color='yellow', label='signal', rot=60)
+            axs[2].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=10))
+            axs[2].axhline(y=0, linestyle='--', color='gray')
+            min = self.df['macd'].min()
+            max = self.df['macd'].max()
+            axs[2].vlines(x=self.buy_actions.index, ymin=min/2,
+                          ymax=max/2, color='red', linestyle='--')
+            axs[2].vlines(x=self.sell_actions.index, ymin=min/2,
+                          ymax=max/2, color='green', linestyle='--')
+            plt.legend(loc="best")
+        plt.tight_layout()
         plt.show()
 
     def plot_deals(self):
         fig = plt.figure(figsize=(12, 8))
-        fig.suptitle('orders analysis', fontsize=60)
+        fig.suptitle('orders analysis', fontsize=12)
         axs = fig.subplots(3)
         fig.tight_layout()
 
@@ -201,6 +221,8 @@ class matBot():
         deal_df['profits'].plot(
             ax=axs[1], kind='bar', color=colors, title='profit')
         deal_df['rate'].plot(ax=axs[2], title='return rate')
+        plt.tight_layout()
+        plt.xticks(fontsize=8)
         plt.show()
 
 

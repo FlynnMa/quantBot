@@ -17,9 +17,8 @@ stock_symbol = '000333'
 init_cash = 1000000
 init_share = 0
 
-
 # get data
-df = pdr.get_data_tiingo(stock_symbol, start='2020-08-18', end='2021-08-18')
+df = pdr.get_data_tiingo(stock_symbol, start='2021-03-05', end='2021-08-18')
 df.reset_index(level=0, inplace=True)
 df.index = df.index.date
 df.drop('symbol', axis=1, inplace=True)
@@ -92,12 +91,12 @@ for x in range(len(df)):
         buy_list.append(float('nan'))
 
 print("simulation completed:")
-print("cash  : " + str(cash))
-print("share : " + str(share))
+print("case  :"  + str(cash))
+print("share :"  + str(share))
 capital = cur_price * share + cash
 print("capital: " + str(capital))
-returnRate = (capital - 1000000) / 1000000
-print("return rate: " + str(returnRate))
+rate = (capital - init_cash) / init_cash
+print("return rate : " + str(rate))
 
 df['buy'] = buy_list
 df['sell'] = sell_list
@@ -111,7 +110,9 @@ fig = plt.figure(figsize=(12, 8))
 fig.suptitle('macd strategy', fontsize=60)
 axs = fig.subplots(2)
 
-df['adjClose'].plot(ax=axs[0], color='purple',
+ylim = (df['adjClose'].min() - 1, df['adjClose'].max() + 2)
+
+df['adjClose'].plot(ax=axs[0], color='purple', ylim=ylim,
                     label='price', rot=90, grid=True)
 df['ema_long'].plot(ax=axs[0], color='yellow',
                     label='price', rot=90, grid=True)

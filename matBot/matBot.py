@@ -22,6 +22,7 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+
 class matBot():
     def __init__(self, symbol='601398', init_cash=1000000,
                  init_share=0, start='2021-01-01', end=None):
@@ -134,6 +135,9 @@ class matBot():
         profits_df = pd.concat([buy_df, sell_df], axis=1)
         profits_df['profits'] = profits_df['sell'] - profits_df['buy']
         profits_df['return_rate'] = profits_df['profits'] / profits_df['buy']
+        self.num_trade = profits_df['profits'].count()
+        self.num_win = sum(profits_df['profits'] > 0)
+        self.win_rate = self.num_win / self.num_trade
         self.profits_df = profits_df
 
     def plot_price_with_orders(self, indicator='macd'):
@@ -159,7 +163,7 @@ class matBot():
         ypadding = self.df['adjClose'].mean() * 0.2
         ymin = self.df['adjClose'].min() - ypadding * 0.2
         ymax = self.df['adjClose'].max() + ypadding * 0.2
-        self.df['ema_long'].plot(ax=axs[0], color='yellow', ylim=(ymin,ymax),
+        self.df['ema_long'].plot(ax=axs[0], color='yellow', ylim=(ymin, ymax),
                                  label='price', rot=60, grid=True)
 
         axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -220,7 +224,15 @@ class matBot():
         colors = np.where(deal_df['profits'].values > 0, 'r', 'g')
         deal_df['profits'].plot(
             ax=axs[1], kind='bar', color=colors, title='profit')
-        deal_df['rate'].plot(ax=axs[2], title='return rate')
+        title_str = 'return rate diagram'
+        deal_df['rate'].plot(
+            ax=axs[2], title=title_str)
+        percent = self.win_rate * 100
+        trade_info = "win rate:%.2f percent\n" % percent
+        info = "Win : %d -  Total : %d" % (self.num_win, self.num_trade)
+        trade_info += info
+        axs[2].text(0, 0, trade_info,  fontsize=8, color="orange")
+
         plt.tight_layout()
         plt.xticks(fontsize=8)
         plt.show()

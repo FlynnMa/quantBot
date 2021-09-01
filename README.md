@@ -60,6 +60,7 @@ fig.savefig("volume.png")
 
 ```
 python3 setup.py pytest
+or
 pytest -s
 ```
 

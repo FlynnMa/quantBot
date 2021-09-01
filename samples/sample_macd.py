@@ -1,6 +1,7 @@
 # %%
 
 import matBot.matBot as mbot
+import matBot.matPlots as botplt
 
 state = 'none'
 
@@ -49,8 +50,9 @@ def macd_indicator(df):
 bot = mbot.matBotRunner(symbol='601012', start='2020-01-01')
 bot.add_indicator(macd_indicator)
 bot.run(on_day_trade)
-bot.plot_price_with_orders()
 
-bot.plot_deals()
+# %%
+botplt.plot_price_with_orders(bot.df, ['macd'])
+botplt.plot_profits(bot.profits_df)
 
 # %%

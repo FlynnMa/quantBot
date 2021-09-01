@@ -6,6 +6,7 @@ import matplotlib as mpl
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
+import matBot.indicators as mindicators
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -57,14 +58,16 @@ class matBot():
         self.df = df
         return df
 
-    def add_indicator(self, indicator_callback):
+    def add_indicator(self, indicator_callback, built_in=None):
         """
         添加指标，这个函数会被直接调用，
         将计算结果直接合并汇总到系统pandas data frame里面去
 
         Parameters
         ----------
-        indicator_callback - 回调函数
+        indicator_callback : 回调函数
+        built_in           : str
+         内置的指标 'macd','kdj'
 
         Returns
         -------
@@ -73,6 +76,8 @@ class matBot():
         df = self.df
         if indicator_callback is not None:
             self.df = indicator_callback(df)
+        if built_in == 'macd':
+            self.df = mindicators.macd(df)
 
     def run_step(self, x, action):
         """
@@ -95,11 +100,17 @@ class matBot():
             self.cash = self.cash - num_hands * one_hand_price
             self.share = num_hands * 100
             self.df.loc[day, 'buy'] = execute_price
+            self.holding_days = 1
         # sell
         elif (action == 'sell') and (self.share >= 100):
             self.cash = self.share * execute_price + self.cash
             self.share = 0
             self.df.loc[day, 'sell'] = execute_price
+            self.holding_days = 0
+        else:
+            self.holding_days = self.holding_days + 1
+
+        self.df.loc[day, 'holding_days'] = self.holding_days
         self.df.loc[day, 'capital'] = execute_price * self.share + self.cash
 
     def run(self, strategic_callback):
@@ -118,6 +129,9 @@ class matBot():
         df['buy'] = np.nan
         df['sell'] = np.nan
         df['capital'] = np.nan
+        # how many days elapsed for holding the stock
+        df['holding_days'] = np.zeros
+        self.holding_days = 0
 
         for x in range(len(df)):
             # get action
@@ -139,103 +153,6 @@ class matBot():
         self.num_win = sum(profits_df['profits'] > 0)
         self.win_rate = self.num_win / self.num_trade
         self.profits_df = profits_df
-
-    def plot_price_with_orders(self, indicator='macd'):
-        """
-        绘制一段时间的价格和指标走势，标注买卖点
-
-        Parameters
-        ----------
-        indicator_callback - 回调函数
-
-        Returns
-        -------
-        None
-        """
-        plt.style.use('dark_background')
-        fig = plt.figure(figsize=(12, 8))
-        fig.suptitle('macd strategy', fontsize=10)
-        axs = fig.subplots(3)
-        fig.tight_layout()
-
-        self.df['adjClose'].plot(ax=axs[0], color='purple',
-                                 label='price', rot=60, grid=True)
-        ypadding = self.df['adjClose'].mean() * 0.2
-        ymin = self.df['adjClose'].min() - ypadding * 0.2
-        ymax = self.df['adjClose'].max() + ypadding * 0.2
-        self.df['ema_long'].plot(ax=axs[0], color='yellow', ylim=(ymin, ymax),
-                                 label='price', rot=60, grid=True)
-
-        axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-        axs[0].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-        axs[0].vlines(x=self.buy_actions.index, ymin=ymin,
-                      ymax=self.buy_actions.values, color='red', linestyle='--')
-        axs[0].vlines(x=self.sell_actions.index, ymin=ymin,
-                      ymax=self.sell_actions.values, color='green', linestyle='--')
-        axs[0].scatter(self.df.index, y=self.df['buy'].values, label='buy',
-                       marker='^', s=70, color='red')
-        axs[0].scatter(self.df.index, y=self.df['sell'].values, label='sell',
-                       marker='x', s=70, color='#00ff00')
-
-        self.df['capital'].plot(ax=axs[1], rot=60)
-        axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-        axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-
-        if indicator == 'macd':
-            self.df['macd'].plot(ax=axs[2], color='green',
-                                 label='macd', grid=True, rot=60)
-            self.df['macd_signal'].plot(
-                ax=axs[2], color='yellow', label='signal', rot=60)
-            axs[2].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-            axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-            axs[2].axhline(y=0, linestyle='--', color='gray')
-            min = self.df['macd'].min()
-            max = self.df['macd'].max()
-            axs[2].vlines(x=self.buy_actions.index, ymin=min/2,
-                          ymax=max/2, color='red', linestyle='--')
-            axs[2].vlines(x=self.sell_actions.index, ymin=min/2,
-                          ymax=max/2, color='green', linestyle='--')
-            plt.legend(loc="best")
-        plt.tight_layout()
-        plt.show()
-
-    def plot_deals(self):
-        fig = plt.figure(figsize=(12, 8))
-        fig.suptitle('orders analysis', fontsize=12)
-        axs = fig.subplots(3)
-        fig.tight_layout()
-
-        buy_df = self.buy_actions.reset_index()
-        buy_df.rename(columns={'index': 'buyDate'}, inplace=True)
-        sell_df = self.sell_actions.reset_index()
-        sell_df.rename(columns={'index': 'sellDate'}, inplace=True)
-        deal_df = pd.concat([buy_df, sell_df], axis=1)
-
-        if (len(deal_df) == 0):
-            print("no orders!")
-            exit()
-        color_dict = {'buy': 'red', 'sell': 'green'}
-        df2 = deal_df.loc[:, ['buy', 'sell']]
-        df2.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)
-
-        # profit
-        deal_df['profits'] = deal_df['sell'] - deal_df['buy']
-        deal_df['rate'] = deal_df['profits'] / deal_df['buy']
-        colors = np.where(deal_df['profits'].values > 0, 'r', 'g')
-        deal_df['profits'].plot(
-            ax=axs[1], kind='bar', color=colors, title='profit')
-        title_str = 'return rate diagram'
-        deal_df['rate'].plot(
-            ax=axs[2], title=title_str)
-        percent = self.win_rate * 100
-        trade_info = "win rate:%.2f percent\n" % percent
-        info = "Win : %d -  Total : %d" % (self.num_win, self.num_trade)
-        trade_info += info
-        axs[2].text(0, 0, trade_info,  fontsize=8, color="orange")
-
-        plt.tight_layout()
-        plt.xticks(fontsize=8)
-        plt.show()
 
 
 def matBotRunner(

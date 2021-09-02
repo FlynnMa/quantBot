@@ -1,7 +1,7 @@
 # %%
 
-import matBot.matBot as mbot
-import matBot.matPlots as botplt
+import flynnBot.flynnBot as fbot
+import flynnBot.plots as botplt
 
 state = 'none'
 
@@ -47,11 +47,12 @@ def macd_indicator(df):
     return df
 
 
-bot = mbot.matBotRunner(symbol='002032', start='2019-01-01')
+bot = fbot.botRunner(symbol='000333', start='2021-01-01')
 bot.add_indicator(macd_indicator)
 bot.run(on_day_trade)
 
 # %%
-botplt.plot_price_with_orders(bot.df, ['macd'])
+botplt.plot_overview(bot.df, indicators=['macd'])
 botplt.plot_profits(bot.profits_df)
 
+# %%

@@ -1,8 +1,22 @@
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import matplotlib as mpl
+
+mpl.rcParams['grid.color'] = 'gray'
+mpl.rcParams['grid.linestyle'] = '--'
+mpl.rcParams['grid.linewidth'] = 0.4
+SMALL_SIZE = 8
+MEDIUM_SIZE = 10
+BIGGER_SIZE = 12
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 indicators_dictonary = {
     'macd': ['macd', 'macd_signal'],
@@ -21,16 +35,21 @@ def plot_indicator_simple(df, target_ax, ind):
     target_ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
     target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
     target_ax.axhline(y=0, linestyle='--', color='gray')
-    min = df[indicators[0]].min()
-    max = df[indicators[0]].max()
-    target_ax.vlines(x=df['buy'].dropna().index, ymin=min/2,
-                     ymax=max/2, color='red', linestyle='--')
-    target_ax.vlines(x=df['sell'].dropna().index, ymin=min/2,
-                     ymax=max/2, color='green', linestyle='--')
+    # min = df[indicators[0]].min()
+    # max = df[indicators[0]].max()
+    buy_indexes = df['buy'].dropna().index
+    buy_indicators = df.loc[buy_indexes, indicators[0]]
+
+    sell_indexes = df['sell'].dropna().index
+    sell_indicators = df.loc[sell_indexes, indicators[0]]
+    target_ax.vlines(x=buy_indexes, ymin=0, ymax=buy_indicators,
+                     color='red', linestyle='--', linewidth=0.8)
+    target_ax.vlines(x=sell_indexes, ymin=0, ymax=sell_indicators,
+                     color='green', linestyle='--', linewidth=0.8)
     plt.legend(loc="best")
 
 
-def plot_price_with_orders(df, indicators=['macd']):
+def plot_overview(df, title="overview", indicators=['macd']):
     """
     绘制一段时间的价格和指标走势，标注买卖点
 
@@ -49,35 +68,33 @@ def plot_price_with_orders(df, indicators=['macd']):
     """
     plt.style.use('dark_background')
     fig = plt.figure(figsize=(12, 8))
-    fig.suptitle('macd strategy', fontsize=10)
-    num_plots = 2 + len(indicators)
+    fig.suptitle(title, fontsize=10)
+    num_plots = 1 + len(indicators)
     axs = fig.subplots(num_plots)
     fig.tight_layout()
 
-    df['adjClose'].plot(ax=axs[0], color='purple',
-                        label='price', rot=60, grid=True)
+    df['capital'].plot(ax=axs[0], rot=60, color='yellow')
+    ax_twin = axs[0].twinx()
+
+    colours = ['purple', 'blue']
     ypadding = df['adjClose'].mean() * 0.2
     ymin = df['adjClose'].min() - ypadding * 0.2
     ymax = df['adjClose'].max() + ypadding * 0.2
-    df['ema_long'].plot(ax=axs[0], color='yellow', ylim=(ymin, ymax),
-                        label='price', rot=60, grid=True)
+    df[['ema_long', 'adjClose']].plot(ax=ax_twin, color=colours,
+                                      ylim=(ymin, ymax), label='price',
+                                      rot=60, grid=True, linewidth=1)
 
-    axs[0].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-    axs[0].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-    axs[0].scatter(df.index, y=df['buy'].values, label='buy',
-                   marker='^', s=70, color='red')
-    axs[0].scatter(df.index, y=df['sell'].values, label='sell',
-                   marker='x', s=70, color='#00ff00')
+    ax_twin.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+    ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    ax_twin.scatter(df.index, y=df['buy'].values, label='buy',
+                    marker='^', s=10, color='red', linewidth=0.5)
+    ax_twin.scatter(df.index, y=df['sell'].values, label='sell',
+                    marker='v', s=10, color='green', linewidth=0.5)
 
-    ax_twin = axs[0].twinx()
-    rspine = ax_twin.spines['right']
-    df['capital'].plot(ax=ax_twin, rot=60)
+    axs[0].legend(loc='lower left')
+    ax_twin.legend(loc='best')
 
-    df['capital'].plot(ax=axs[1], rot=60)
-    axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-    axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-
-    index = 2
+    index = 1
     for ind in indicators:
         plot_indicator_simple(df, axs[index], ind)
         index = index + 1

@@ -77,9 +77,8 @@ python3 setup.py bdist_wheel
 https://www.python.org/downloads/
 ```
 
+# 卸载和安装flynnBot机器人
 ```
-# 如果安装过matBot
-python3 -m pip uninstall -y matBot
-# 安装库
-python3 -m pip install dist/matBot-0.1.0-py3-none-any.whl
+python3 -m pip uninstall -y flynnBot
+python3 -m pip install dist/flynnBot-0.1.0-py3-none-any.whl
 ```

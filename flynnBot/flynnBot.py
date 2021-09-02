@@ -6,7 +6,7 @@ import matplotlib as mpl
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
-import matBot.indicators as mindicators
+import flynnBot.indicators as mindicators
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -24,7 +24,7 @@ plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 
-class matBot():
+class flynnBot():
     def __init__(self, symbol='601398', init_cash=1000000,
                  init_share=0, start='2021-01-01', end=None):
         # stock symbol
@@ -204,7 +204,8 @@ class matBot():
         self.df['capital'].plot(ax=axs[1], rot=60)
         # axs[1].xaxis.set_minor_locator(mdates.DayLocator(interval=1))
         # axs[1].xaxis.set_major_locator(mdates.DayLocator(interval=10))
-        axs[1].text(0.1, 0.8, ret_info, fontsize=8, color="orange", transform=axs[1].transAxes)
+        axs[1].text(0.1, 0.8, ret_info, fontsize=8,
+                    color="orange", transform=axs[1].transAxes)
 
         if indicator == 'macd':
             self.df['macd'].plot(ax=axs[2], color='green',
@@ -263,11 +264,11 @@ class matBot():
         plt.show()
 
 
-def matBotRunner(
+def botRunner(
         symbol='601398', init_cash=1000000, init_share=0,
         start='2021-01-01', end=None):
     """
-    创建matBot， 获取交易数据
+    这是一个帮助函数，负责创建flynnBot，并且获取交易数据
 
     Parameters
     ----------
@@ -281,7 +282,7 @@ def matBotRunner(
     -------
     创建的mbot对象
     """
-    bot = matBot(symbol, init_cash, init_share, start, end)
+    bot = flynnBot(symbol, init_cash, init_share, start, end)
     bot.fetch()
     print("fetch completed")
     return bot

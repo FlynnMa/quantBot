@@ -1,12 +1,12 @@
 
 
-import matBot.matBot as mbot
-import matBot.matPlots as botplt
+import flynnBot.flynnBot as fbot
+import flynnBot.plots as botplt
 print("basic test infrastructure")
 
 
 def test_run():
-    bot = mbot.matBotRunner()
+    bot = fbot.flynnBotRunner()
     assert len(bot.df) != 0
 
 
@@ -32,14 +32,14 @@ def macd_indicator(df):
 
 def test_run_set_start():
     print("set start time to 2020-01-01")
-    bot = mbot.matBotRunner(start='2020-01-01')
+    bot = fbot.flynnBotRunner(start='2020-01-01')
     bot.add_indicator(macd_indicator)
     bot.run(on_day_trade)
-    botplt.plot_price_with_orders(bot.df, ['macd'])
+    botplt.plot_overview(bot.df, ['macd'])
     assert len(bot.df) != 0
 
 
 def test_built_in_indicators():
     print("test built in indicators")
-    bot = mbot.matBotRunner(symbol='601012')
+    bot = fbot.flynnBotRunner(symbol='601012')
     bot.add_indicator(None, built_in='macd')

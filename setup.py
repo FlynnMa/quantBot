@@ -9,7 +9,7 @@ with open('LICENSE', encoding='utf-8') as f:
     license = f.read()
 
 setup(
-    name='matBot',
+    name='flynnBot',
 
     version='0.1.0',
 
@@ -28,7 +28,7 @@ setup(
     license=license,
 
     packages=find_packages(
-        include=['matBot', 'samples'],
+        include=['flynnBot', 'samples'],
         exclude=['tests', 'docs']
     ),
     install_requires=[

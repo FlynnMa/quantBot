@@ -1,7 +1,13 @@
-# 腾讯云也已经上线
-这个库也可以从以下的链接进行访问：
+# 源码地址
+
+### github
+https://github.com/FlynnMa/quantBot
+
+### coding.net
 https://flynnbot.coding.net/public/quantBot/quantBot/git
 
+### gitee
+https://gitee.com/flynnma/quantBot
 
 # 环境配置
 
@@ -12,6 +18,7 @@ pandas
 pandas_datareader
 
 visual studio code + python插件， jupyter插件
+or 
 jupyter
 ```
 

@@ -56,6 +56,9 @@ class flynnBot():
         df.reset_index(level=0, inplace=True)
         df.index = df.index.date
         df.drop('symbol', axis=1, inplace=True)
+        df = df.rename_axis('date').reset_index()
+        df['date_str'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        df.set_index('date_str', inplace=True)
         self.starting_price = df.head(1)['adjClose'].values[0]
         self.enter_capital = self.starting_price * self.share + self.cash
         self.df = df

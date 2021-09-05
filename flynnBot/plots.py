@@ -31,7 +31,7 @@ def plot_indicator_simple(df, target_ax, ind):
     indicators = indicators_dictonary[ind]
     colours = ['green', 'yellow', 'red', 'blue']
     df[indicators].plot(ax=target_ax, color=colours,
-                        grid=True, rot=60)
+                        grid=True, rot=60, sharex=True)
     target_ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
     target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
     target_ax.axhline(y=0, linestyle='--', color='gray')
@@ -73,23 +73,33 @@ def plot_overview(df, title="overview", indicators=['macd']):
     axs = fig.subplots(num_plots)
     fig.tight_layout()
 
-    df['capital'].plot(ax=axs[0], rot=60, color='yellow')
+    df['capital'].plot(ax=axs[0], rot=60, grid=True, color='yellow')
     ax_twin = axs[0].twinx()
 
-    colours = ['purple', 'blue']
+    colours = ['green', 'red']
     ypadding = df['adjClose'].mean() * 0.2
     ymin = df['adjClose'].min() - ypadding * 0.2
     ymax = df['adjClose'].max() + ypadding * 0.2
     df[['ema_long', 'adjClose']].plot(ax=ax_twin, color=colours,
-                                      ylim=(ymin, ymax), label='price',
+                                      ylim=(ymin, ymax), label=[
+                                          'ema_long', 'price'],
                                       rot=60, grid=True, linewidth=1)
 
     ax_twin.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
     ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=10))
-    ax_twin.scatter(df.index, y=df['buy'].values, label='buy',
-                    marker='^', s=10, color='red', linewidth=0.5)
-    ax_twin.scatter(df.index, y=df['sell'].values, label='sell',
-                    marker='v', s=10, color='green', linewidth=0.5)
+    buy_indexes = df['buy'].dropna().index
+    buy_prices = df['buy'].dropna().values
+
+    sell_indexes = df['sell'].dropna().index
+    sell_prices = df['sell'].dropna().values
+    ax_twin.scatter(buy_indexes, y=buy_prices, label='buy',
+                    marker='^', s=20, color='red')
+    ax_twin.scatter(sell_indexes, y=sell_prices, label='sell',
+                    marker='v', s=20, color='green')
+    ax_twin.vlines(x=buy_indexes, ymin=0, ymax=buy_prices,
+                   color='red', linestyle='--', linewidth=0.8)
+    ax_twin.vlines(x=sell_indexes, ymin=0, ymax=sell_prices,
+                   color='green', linestyle='--', linewidth=0.8)
 
     axs[0].legend(loc='lower left')
     ax_twin.legend(loc='best')

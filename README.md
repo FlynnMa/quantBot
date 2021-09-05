@@ -89,3 +89,7 @@ https://www.python.org/downloads/
 python3 -m pip uninstall -y flynnBot
 python3 -m pip install dist/flynnBot-0.1.0-py3-none-any.whl
 ```
+
+# 沪深300官网
+http://www.csindex.com.cn/zh-CN/indices/index-detail/000300
+

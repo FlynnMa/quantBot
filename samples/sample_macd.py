@@ -5,7 +5,6 @@ import flynnBot.plots as botplt
 
 state = 'none'
 
-
 def on_day_trade(x, df):
     global state
     cur_price = df['adjClose'].iloc[x]

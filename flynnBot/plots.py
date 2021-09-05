@@ -3,6 +3,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
+from matplotlib.ticker import (MultipleLocator,AutoMinorLocator)
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -20,7 +21,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 indicators_dictonary = {
     'macd': ['macd', 'macd_signal'],
-    'kdj': ['kdj-k', 'kdj-j']
+    'kdj': ['kdj-k', 'kdj-d']
 }
 
 
@@ -32,6 +33,9 @@ def plot_indicator_simple(df, target_ax, ind):
     colours = ['green', 'yellow', 'red', 'blue']
     df[indicators].plot(ax=target_ax, color=colours,
                         grid=True, rot=60, sharex=True)
+    target_ax.set_xticks(df.index)
+    target_ax.set_xticklabels(df['date_str'], rotation=60)
+
     target_ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
     target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
     target_ax.axhline(y=0, linestyle='--', color='gray')
@@ -80,13 +84,14 @@ def plot_overview(df, title="overview", indicators=['macd']):
     ypadding = df['adjClose'].mean() * 0.2
     ymin = df['adjClose'].min() - ypadding * 0.2
     ymax = df['adjClose'].max() + ypadding * 0.2
-    df[['ema_long', 'adjClose']].plot(ax=ax_twin, color=colours,
+    df[['ema_60', 'adjClose']].plot(ax=ax_twin, color=colours,
                                       ylim=(ymin, ymax), label=[
                                           'ema_long', 'price'],
                                       rot=60, grid=True, linewidth=1)
+    ax_twin.xaxis.set_major_locator(MultipleLocator(10))
+    # ax_twin.set_xticks(df.index)
+    # ax_twin.set_xticklabels(df['date_str'], rotation=60)
 
-    ax_twin.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-    ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=10))
     buy_indexes = df['buy'].dropna().index
     buy_prices = df['buy'].dropna().values
 

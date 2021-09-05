@@ -58,8 +58,9 @@ class flynnBot():
         df.drop('symbol', axis=1, inplace=True)
         df = df.rename_axis('date').reset_index()
         df['date_str'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        df.set_index('date_str', inplace=True)
+        # df.set_index('date_str', inplace=True)
         self.starting_price = df.head(1)['adjClose'].values[0]
+        df['ema_60'] = df['adjClose'].ewm(span=60).mean()
         self.enter_capital = self.starting_price * self.share + self.cash
         self.df = df
         return df
@@ -179,7 +180,6 @@ class flynnBot():
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle('macd strategy', fontsize=10)
         axs = fig.subplots(3)
-        # fig.tight_layout()
 
         self.df['adjClose'].plot(ax=axs[0], color='purple',
                                  label='price', rot=60, grid=True)

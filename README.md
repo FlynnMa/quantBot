@@ -22,6 +22,11 @@ or
 jupyter
 ```
 
+安装python3
+```
+https://www.python.org/downloads/
+```
+
 # 数据
 
 目前的数据采用的是 tiingo.com免费提供的
@@ -78,13 +83,7 @@ python3 setup.py clean --all
 python3 setup.py bdist_wheel
 ```
 
-### 安装
-安装python3
-```
-https://www.python.org/downloads/
-```
-
-# 卸载和安装flynnBot机器人
+### 卸载和安装flynnBot机器人
 ```
 python3 -m pip uninstall -y flynnBot
 python3 -m pip install dist/flynnBot-0.1.0-py3-none-any.whl

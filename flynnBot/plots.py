@@ -13,7 +13,7 @@ MEDIUM_SIZE = 10
 BIGGER_SIZE = 12
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('axes', labelsize=SMALL_SIZE)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
@@ -21,20 +21,25 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 indicators_dictonary = {
     'macd': ['macd', 'macd_signal'],
-    'kdj': ['kdj-k', 'kdj-d']
+    'kdj': ['kdj-k', 'kdj-d', 'kdj-j']
 }
 
 
-def plot_indicator_simple(df, target_ax, ind):
+def plot_indicator_simple(df, target_ax, ind, show_label):
 
     if ind is None:
         return
     indicators = indicators_dictonary[ind]
     colours = ['green', 'yellow', 'red', 'blue']
     df[indicators].plot(ax=target_ax, color=colours,
-                        grid=True, rot=60, sharex=True)
+                        grid=True)
+    target_ax.set_xlim(0, len(df))
     target_ax.set_xticks(df.index)
-    target_ax.set_xticklabels(df['date_str'], rotation=60)
+    if show_label == True:
+        target_ax.set_xticklabels(df['date_str'], rotation=30)
+    else :
+        target_ax.set_xticklabels(df['date_str'].str.slice(start=6, stop=10))
+    
 
     target_ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
     target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
@@ -77,7 +82,7 @@ def plot_overview(df, title="overview", indicators=['macd']):
     axs = fig.subplots(num_plots)
     fig.tight_layout()
 
-    df['capital'].plot(ax=axs[0], rot=60, grid=True, color='yellow')
+    df['capital'].plot(ax=axs[0], color='yellow')
     ax_twin = axs[0].twinx()
 
     colours = ['green', 'red']
@@ -87,10 +92,13 @@ def plot_overview(df, title="overview", indicators=['macd']):
     df[['ema_60', 'adjClose']].plot(ax=ax_twin, color=colours,
                                       ylim=(ymin, ymax), label=[
                                           'ema_long', 'price'],
-                                      rot=60, grid=True, linewidth=1)
-    ax_twin.xaxis.set_major_locator(MultipleLocator(10))
-    # ax_twin.set_xticks(df.index)
-    # ax_twin.set_xticklabels(df['date_str'], rotation=60)
+                                      grid=True, linewidth=1)
+    ax_twin.set_xticks(df.index)
+    ax_twin.set_xticklabels(df['date_str'].str.slice(start=6, stop=10), rotation=60)
+    axs[0].set_xlim(0, len(df))
+    ax_twin.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+    ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    # ax_twin.xaxis.set_major_locator(MultipleLocator(10))
 
     buy_indexes = df['buy'].dropna().index
     buy_prices = df['buy'].dropna().values
@@ -111,7 +119,10 @@ def plot_overview(df, title="overview", indicators=['macd']):
 
     index = 1
     for ind in indicators:
-        plot_indicator_simple(df, axs[index], ind)
+        show_label = False
+        if index == len(indicators):
+            show_label = True
+        plot_indicator_simple(df, axs[index], ind, show_label)
         index = index + 1
 
     plt.tight_layout()

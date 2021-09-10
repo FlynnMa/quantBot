@@ -19,10 +19,15 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+# 指标显示有关的定义
 indicators_dictonary = {
     'macd': ['macd', 'macd_signal'],
     'kdj': ['kdj-k', 'kdj-d', 'kdj-j']
 }
+style_list = ['-', '-', '--', '--', '--']
+linewidth_list  = [1.1, 1, 0.8, 0.8, 0.8]
+zorder_list  = [5,4,3,2,1]
+colours_list = ['darkcyan', 'yellow', 'slategray', 'salmon']
 
 
 def plot_indicator_simple(df, target_ax, ind, show_label):
@@ -30,19 +35,26 @@ def plot_indicator_simple(df, target_ax, ind, show_label):
     if ind is None:
         return
     indicators = indicators_dictonary[ind]
-    colours = ['green', 'yellow', 'red', 'blue']
-    df[indicators].plot(ax=target_ax, color=colours,
-                        grid=True)
+    
+    for i in range(len(indicators)):
+        data = indicators[i]
+        s = style_list[i]
+        w = linewidth_list[i]
+        z = zorder_list[i]
+        c = colours_list[i]
+        df[data].plot(ax=target_ax, color=c,
+                        style=s, linewidth=w, zorder=z)
     target_ax.set_xlim(0, len(df))
     target_ax.set_xticks(df.index)
+    target_ax.grid(True)
     if show_label == True:
         target_ax.set_xticklabels(df['date_str'], rotation=30)
     else :
-        target_ax.set_xticklabels(df['date_str'].str.slice(start=6, stop=10))
+        target_ax.set_xticklabels(df['date_str'].str.slice(start=5, stop=10))
     
 
     target_ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-    target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    target_ax.xaxis.set_major_locator(mdates.DayLocator(interval=20))
     target_ax.axhline(y=0, linestyle='--', color='gray')
     # min = df[indicators[0]].min()
     # max = df[indicators[0]].max()
@@ -52,10 +64,10 @@ def plot_indicator_simple(df, target_ax, ind, show_label):
     sell_indexes = df['sell'].dropna().index
     sell_indicators = df.loc[sell_indexes, indicators[0]]
     target_ax.vlines(x=buy_indexes, ymin=0, ymax=buy_indicators,
-                     color='red', linestyle='--', linewidth=0.8)
+                     color='orangered', linestyle='--', linewidth=0.8)
     target_ax.vlines(x=sell_indexes, ymin=0, ymax=sell_indicators,
                      color='green', linestyle='--', linewidth=0.8)
-    plt.legend(loc="best")
+    target_ax.legend(loc='best')
 
 
 def plot_overview(df, title="overview", indicators=['macd']):
@@ -69,7 +81,7 @@ def plot_overview(df, title="overview", indicators=['macd']):
     也可以是大于一个的，如：['macd', 'kdj']
     机器人将选择对应的数据,目前支持：
         'macd'  - ['macd'  ,  'macd_signal']
-        'kdj'   - ['kdj-k' ,  'kdj-j']
+        'kdj'   - ['kdj-k' ,  'kdj-d']
 
     Returns
     -------
@@ -94,10 +106,10 @@ def plot_overview(df, title="overview", indicators=['macd']):
                                           'ema_long', 'price'],
                                       grid=True, linewidth=1)
     ax_twin.set_xticks(df.index)
-    ax_twin.set_xticklabels(df['date_str'].str.slice(start=6, stop=10), rotation=60)
+    ax_twin.set_xticklabels(df['date_str'].str.slice(start=5, stop=10), rotation=60)
     axs[0].set_xlim(0, len(df))
     ax_twin.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-    ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    ax_twin.xaxis.set_major_locator(mdates.DayLocator(interval=20))
     # ax_twin.xaxis.set_major_locator(MultipleLocator(10))
 
     buy_indexes = df['buy'].dropna().index

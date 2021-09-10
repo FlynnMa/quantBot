@@ -60,14 +60,14 @@ def kdj_indicator2(df):
 
     df['rsv'] = 100 * ((dx['adjClose'] - dx['min14']) /
                        (dx['max14'] - dx['min14']))
-    df['kdj-k'] = dx['rsv'].ewm(com=2, adjust=False).mean()
+    df['kdj-k'] = df['rsv'].ewm(com=2, adjust=False).mean()
     df['kdj-d'] = df['kdj-k'].ewm(com=2, adjust=False).mean()
     df['kdj-j'] = 3 * df['kdj-k'] - 2 * df['kdj-d']
     return df
 
 
 bot = fbot.botRunner(symbol='600036', start='2020-01-01')
-bot.add_indicator(kdj_indicator)
+bot.add_indicator(kdj_indicator2)
 bot.add_indicator(None, 'macd')
 
 bot.run(on_day_trade)

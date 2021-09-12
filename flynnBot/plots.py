@@ -102,9 +102,9 @@ def plot_overview(df, title="overview", indicators=['macd']):
     ymin = df['adjClose'].min() - ypadding * 0.2
     ymax = df['adjClose'].max() + ypadding * 0.2
     df[['ema_60', 'adjClose']].plot(ax=ax_twin, color=colours,
-                                      ylim=(ymin, ymax), label=[
-                                          'ema_long', 'price'],
-                                      grid=True, linewidth=1)
+                                    ylim=(ymin, ymax), label=[
+                                    'ema_long', 'price'],
+                                    grid=True, linewidth=1)
     ax_twin.set_xticks(df.index)
     ax_twin.set_xticklabels(df['date_str'].str.slice(start=5, stop=10), rotation=60)
     axs[0].set_xlim(0, len(df))

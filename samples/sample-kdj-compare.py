@@ -7,7 +7,7 @@ import math
 
 state = 'none'
 
-def on_day_trade(i, df):
+def on_day_trade(i, df, holding_price):
     global state
 
     k = df['kdj-k'].iloc[i]

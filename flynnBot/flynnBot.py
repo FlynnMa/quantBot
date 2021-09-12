@@ -7,6 +7,10 @@ import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
 import flynnBot.indicators as mindicators
+import requests
+import time
+import socket
+import urllib3
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -32,6 +36,8 @@ class flynnBot():
         self.cash = init_cash
         self.share = init_share
         self.enter_capital = 0
+        self.holding_days = 0
+        self.holding_price = 0.0
 
         self.start = start
         self.end = datetime.date.today()
@@ -48,10 +54,18 @@ class flynnBot():
 
         Returns
         -------
-        pandas data frame
+        pandas data frame or None failed
         """
-        df = pdr.get_data_tiingo(
-            self.stock_symbol, start=self.start, end=self.end)
+        try:
+            df = pdr.get_data_tiingo(
+                self.stock_symbol, start=self.start, end=self.end)
+        except Exception as e:
+            print(e)
+            print("tiingo timeout accurrs")
+            time.sleep(2)
+            return None
+
+
         # format data
         df.reset_index(level=0, inplace=True)
         df.index = df.index.date
@@ -108,13 +122,15 @@ class flynnBot():
             self.share = num_hands * 100
             self.df.loc[day, 'buy'] = execute_price
             self.holding_days = 1
+            self.holding_price = execute_price
         # sell
         elif (action == 'sell') and (self.share >= 100):
             self.cash = self.share * execute_price + self.cash
             self.share = 0
             self.df.loc[day, 'sell'] = execute_price
             self.holding_days = 0
-        else:
+            self.holding_price = 0
+        elif self.share >= 100:
             self.holding_days = self.holding_days + 1
 
         self.df.loc[day, 'holding_days'] = self.holding_days
@@ -144,7 +160,7 @@ class flynnBot():
             # get action
             action = 'none'
             if strategic_callback is not None:
-                action = strategic_callback(x, df)
+                action = strategic_callback(x, df, self.starting_price)
             self.run_step(x, action)
 
         self.buy_actions = df['buy'].dropna()
@@ -283,9 +299,11 @@ def botRunner(
 
     Returns
     -------
-    创建的mbot对象
+    创建的mbot对象, 或者None 表示失败
     """
     bot = flynnBot(symbol, init_cash, init_share, start, end)
-    bot.fetch()
+    ret = bot.fetch()
+    if (ret is None):
+        return None
     print("fetch completed")
     return bot

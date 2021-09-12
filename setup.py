@@ -11,7 +11,7 @@ with open('LICENSE', encoding='utf-8') as f:
 setup(
     name='flynnBot',
 
-    version='0.1.0',
+    version='0.1.1',
 
     description='A green trading robot',
 

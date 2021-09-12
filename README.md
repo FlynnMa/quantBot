@@ -86,7 +86,11 @@ python3 setup.py bdist_wheel
 ### 卸载和安装flynnBot机器人
 ```
 python3 -m pip uninstall -y flynnBot
-python3 -m pip install dist/flynnBot-0.1.0-py3-none-any.whl
+python3 -m pip install dist/flynnBot-0.1.1-py3-none-any.whl
+```
+
+```
+python3 setup.py install
 ```
 
 # 沪深300官网

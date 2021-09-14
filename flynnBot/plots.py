@@ -43,8 +43,7 @@ def plot_indicator_simple(df_main, target_ax, ind, show_label):
         return
     indicators = indicators_dictonary[ind]
 
-    for i, tmp in enumerate(indicators):
-        data = indicators[i]
+    for i, data in enumerate(indicators):
         style = style_list[i]
         width = linewidth_list[i]
         zorder = zorder_list[i]

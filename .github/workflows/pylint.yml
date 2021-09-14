@@ -23,5 +23,5 @@ jobs:
         pip install python-dateutil
     - name: Analysing the code with pylint
       run: |
-        pylint $(find . -name "*.py" | xargs) --disable=C0103 --disable=unused-argument
+        pylint $(find . -name "*.py" | xargs) --disable=C0103 --disable=unused-argument --disable=global-statement
 

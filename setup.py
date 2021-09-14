@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-
+"""
+可以通过下面命令安装
+python3 setup.py install
+"""
 from setuptools import setup, find_packages
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 with open('LICENSE', encoding='utf-8') as f:
-    license = f.read()
+    lic = f.read()
 
 setup(
     name='flynnBot',
@@ -25,7 +28,7 @@ setup(
 
     url='https://github.com/FlynnMa/quantBot',
 
-    license=license,
+    license=lic,
 
     packages=find_packages(
         include=['flynnBot', 'samples'],

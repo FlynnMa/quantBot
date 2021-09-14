@@ -1,12 +1,14 @@
 # %%
 
+import numpy as np
+import pandas as pd
+
 import pandas_datareader as pdr
+
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import os
-import numpy as np
-import matplotlib as mpl
-import pandas as pd
+
 
 mpl.rcParams['grid.color'] = 'gray'
 mpl.rcParams['grid.linestyle'] = '--'
@@ -151,7 +153,7 @@ sell_df = sell_actions.reset_index()
 sell_df.rename(columns={'index': 'sellDate'}, inplace=True)
 deal_df = pd.concat([buy_df, sell_df], axis=1)
 
-if (len(deal_df) == 0):
+if len(deal_df) == 0:
     print("no deal!")
     exit()
 color_dict = {'buy': 'red', 'sell': 'green'}

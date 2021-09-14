@@ -43,7 +43,7 @@ def plot_indicator_simple(df_main, target_ax, ind, show_label):
         return
     indicators = indicators_dictonary[ind]
 
-    for i, ind in enumerate(indicators):
+    for i, tmp in enumerate(indicators):
         data = indicators[i]
         style = style_list[i]
         width = linewidth_list[i]
@@ -162,7 +162,7 @@ def plot_profits(profits_df):
     """
     if len(profits_df) == 0:
         print("no orders!")
-        exit()
+        return
 
     fig = plt.figure(figsize=(12, 8))
     fig.suptitle('orders analysis', fontsize=12)

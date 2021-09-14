@@ -1,6 +1,8 @@
+"""
+如何获取数据
+"""
 import os
 import matplotlib.pyplot as plt
-import pandas as pd
 import pandas_datareader as pdr
 
 

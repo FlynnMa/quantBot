@@ -1,4 +1,6 @@
-
+"""
+单元测试， pytest调用
+"""
 
 import flynnBot.flynnBot as fbot
 import flynnBot.plots as botplt

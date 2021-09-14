@@ -1,5 +1,8 @@
+"""
+我的第六个视频写的代码
+"""
 # %%
-
+import sys
 import numpy as np
 import pandas as pd
 
@@ -58,6 +61,7 @@ for x in range(len(df)):
     # signal  = df['macd_signal'].iloc[x]
     diff = df['macd_diff'].iloc[x]
     action = 'none'
+
 
     if state == 'none':
         if diff > 0:
@@ -155,7 +159,7 @@ deal_df = pd.concat([buy_df, sell_df], axis=1)
 
 if len(deal_df) == 0:
     print("no deal!")
-    exit()
+    sys.exit()
 color_dict = {'buy': 'red', 'sell': 'green'}
 df2 = deal_df.loc[:, ['buy', 'sell']]
 df2.plot(ax=axs[0], kind='bar', color=color_dict, rot=90)

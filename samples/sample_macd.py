@@ -1,3 +1,6 @@
+"""
+macd算法和交易策略的基础实现
+"""
 # %%
 
 import flynnBot.flynnBot as fbot
@@ -5,12 +8,13 @@ import flynnBot.plots as botplt
 
 state = 'none'
 
-def on_day_trade(x, df):
+def on_day_trade(i, df_main, holding_price):
+    """
+    买卖策略，决定这一天是否买入
+    """
     global state
-    cur_price = df['adjClose'].iloc[x]
-    macd = df['macd'].iloc[x]
-    diff = df['macd_diff'].iloc[x]
-    one_hand = cur_price * 100
+
+    diff = df_main['macd_diff'].iloc[i]
 
     action = 'none'
     if state == 'none':
@@ -32,6 +36,9 @@ def on_day_trade(x, df):
 
 
 def macd_indicator(df):
+    """
+    macd指标的计算， 可以依据实际情况和回测结果调整时间窗口
+    """
     # 26 days by default for long term ema
     ema_win_long = 26
     # 12 days by default for short term ema
@@ -51,7 +58,7 @@ bot.add_indicator(macd_indicator)
 bot.run(on_day_trade)
 
 # %%
-botplt.plot_overview(bot.df, indicators=['macd'])
-botplt.plot_profits(bot.profits_df)
+botplt.plot_overview(bot.df_main, indicators=['macd'])
+botplt.plot_profits(bot.df_profits)
 
 # %%

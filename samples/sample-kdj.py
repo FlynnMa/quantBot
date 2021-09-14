@@ -1,17 +1,23 @@
+"""
+kdj算法和交易策略的基础实现
+"""
+import math
+import pandas as pd
 import flynnBot.flynnBot as fbot
 import flynnBot.plots    as fplt
-import pandas as pd
-import math
 
 state = 'none'
 
-def on_day_trade(i, df):
+def on_day_trade(i, df, holding_price):
+    """
+    交易策略的主体部分，决定是否买入卖出
+    """
     global state
 
     k = df['kdj-k'].iloc[i]
     if math.isnan(k):
         return 'none'
-    
+
     # 如果获取了合法的k值
     d = df['kdj-d'].iloc[i]
     diff = k - d
@@ -36,6 +42,9 @@ def on_day_trade(i, df):
     return action
 
 def kdj_indicator(df):
+    """
+    KDJ的指标计算，来源于investopedia和wikipedia
+    """
     # 14 days by default for the k time window
     k_window = 14
 
@@ -51,6 +60,10 @@ def kdj_indicator(df):
 
 
 def kdj_indicator2(df):
+    """
+    KDJ的指标计算，第二种方法，这个方法我回测下来，表现略好
+    """
+
     # 14 days by default for the k time window
     k_window = 14
 
@@ -72,7 +85,7 @@ bot.add_indicator(None, 'macd')
 
 bot.run(on_day_trade)
 
-fplt.plot_overview(bot.df, title="my kdj first try",
+fplt.plot_overview(bot.df_main, title="my kdj first try",
 indicators=['kdj', 'macd'])
 
-fplt.plot_profits(bot.profits_df)
+fplt.plot_profits(bot.df_profits)

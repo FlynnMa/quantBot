@@ -92,7 +92,8 @@ class flynnBot():
         df_main['date_str'] = df_main['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
         # df.set_index('date_str', inplace=True)
         self.starting_price = df_main.head(1)['adjClose'].values[0]
-        df_main['ema_60'] = df_main['adjClose'].ewm(span=60).mean()
+        df_main['ema_48'] = df_main['adjClose'].ewm(span=22).mean()
+        df_main['ema_14'] = df_main['adjClose'].ewm(span=5).mean()
         self.enter_capital = self.starting_price * self.share + self.cash
         self.df_main = df_main
         return df_main
@@ -137,7 +138,7 @@ class flynnBot():
         if (action == 'buy') and (self.cash >= one_hand_price):
             num_hands = int(self.cash / one_hand_price)
             self.cash = self.cash - num_hands * one_hand_price
-            self.share = num_hands * 100
+            self.share = num_hands * 100 + self.share
             self.df_main.loc[day, 'buy'] = execute_price
             self.holding_days = 1
             self.holding_price = execute_price

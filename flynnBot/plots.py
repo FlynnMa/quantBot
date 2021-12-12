@@ -24,7 +24,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 # 指标显示有关的定义
 indicators_dictonary = {
-    'macd': ['macd', 'macd_signal'],
+    'macd': ['macd', 'macd_signal', 'macd_diff'],
     'kdj': ['kdj-k', 'kdj-d', 'kdj-j']
 }
 style_list = ['-', '-', '--', '--', '--']
@@ -100,14 +100,14 @@ def plot_overview(df_main, title="overview", indicators=None):
     axs = fig.subplots(num_plots)
     fig.tight_layout()
 
-    df_main['capital'].plot(ax=axs[0], color='yellow')
+    df_main['capital'].plot(ax=axs[0], color='gray')
     ax_twin = axs[0].twinx()
 
-    colours = ['green', 'red']
+    colours = ['green', 'blue', 'yellow', 'gray']
     ypadding = df_main['adjClose'].mean() * 0.2
     ymin = df_main['adjClose'].min() - ypadding * 0.2
     ymax = df_main['adjClose'].max() + ypadding * 0.2
-    df_main[['ema_60', 'adjClose']].plot(ax=ax_twin, color=colours,
+    df_main[['ema_14','ema_48', 'adjClose']].plot(ax=ax_twin, color=colours,
                                     ylim=(ymin, ymax), label=[
                                     'ema_long', 'price'],
                                     grid=True, linewidth=1)
